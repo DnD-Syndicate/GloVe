@@ -10,3 +10,7 @@ spark.createDataFrame(opinion_df.select('resource_id', 'parsed_text').take(1000)
 # load parquet file into Spark
 df = spark.read.load('data/wash_state_1000_opinions.parquet')
 
+# split each document into sentences
+sent_tokens = udf(lambda doc: sent_tokenize(doc), ArrayType(StringType()))
+df_sentences = df.withColumn('sents', sent_tokens('parsed_text'))
+
