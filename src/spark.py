@@ -18,5 +18,11 @@ nltk.download('punkt')
 
 # split each document into sentences
 sent_tokens = udf(lambda doc: sent_tokenize(doc.replace('\n', ' ').strip()), ArrayType(StringType()))
+token_lists = udf(lambda doc: [word_tokenize(sentence) for sentence in sent_tokenize(doc.replace('\n', ' ').strip())], ArrayType(ArrayType(StringType())))
 df_sentences = df_opinions_unparsed.withColumn('sents', sent_tokens('parsed_text'))
+
+# use a list generator in a spark UDF to first separate into sentences, and then word tokens
+# this is important because the GloVe implementation will find relationship ratios based on colocation within sentences.
+token_lists = udf(lambda doc: [word_tokenize(sentence) for sentence in sent_tokenize(doc.replace('\n', ' ').strip())], ArrayType(ArrayType(StringType())))
+df_words = df_opinions_unparsed.withColumn('sents', token_lists('parsed_text'))
 
