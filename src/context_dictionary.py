@@ -2,10 +2,13 @@ from collections import Counter
 from collections import defaultdict
 from itertools import chain
 
-def context(sentence):
+def context(sentence, window_size=10):
     """
     INPUT:
     - sentence:  list, A list of words which represents the sentence.
+    - window_size:  int, The size of the symmetric context window to each side of
+                        the word.
+
 
     OUTPUT:
     - context_dictionary:  dict, A dictionary where the key is the context word and
@@ -15,7 +18,7 @@ def context(sentence):
     """
     context_dictionary = defaultdict(Counter)
     for idx, word in enumerate(sentence):
-        left_window = sentence[max(0, idx - 5): idx]
-        right_window = sentence[idx + 1: idx + 6]
+        left_window = sentence[max(0, idx - window_size // 2): idx]
+        right_window = sentence[idx + 1: idx + window_size // 2]
         context_dictionary[word].update(chain(left_window, right_window))
     return context_dictionary
