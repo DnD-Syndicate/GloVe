@@ -2,10 +2,11 @@ from collections import Counter
 from collections import defaultdict
 from itertools import chain
 
-def context(sentence, window_size=10):
+def context(document, window_size=10):
     """
     INPUT:
-    - sentence:  list, A list of words which represents the sentence.
+    - document:  list, A list of lists where each list consists of the words which
+                        constitute a sentence.
     - window_size:  int, The size of the symmetric context window to each side of
                         the word.
 
@@ -17,8 +18,9 @@ def context(sentence, window_size=10):
     and end of the sentence.  For example, {'dog': {'cat': 2, 'mouse': 4}}
     """
     context_dictionary = defaultdict(Counter)
-    for idx, word in enumerate(sentence):
-        left_window = sentence[max(0, idx - window_size // 2): idx]
-        right_window = sentence[idx + 1: idx + window_size // 2]
-        context_dictionary[word].update(chain(left_window, right_window))
+    for sentence in document:
+        for idx, word in enumerate(sentence):
+            left_window = sentence[max(0, idx - window_size // 2): idx]
+            right_window = sentence[idx + 1: idx + window_size // 2]
+            context_dictionary[word].update(chain(left_window, right_window))
     return context_dictionary
