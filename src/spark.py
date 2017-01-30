@@ -20,7 +20,7 @@ spark.createDataFrame(
 df_opinions_unparsed = spark.read.load('data/wash_state_1000_opinions.parquet')
 
 # one time only download required for sent_tokenize
-nltk.download('punkt')
+import nltk; nltk.download('punkt')
 
 # use a list generator in a spark UDF to first separate into sentences, and then word tokens
 # this is important because the GloVe implementation will find relationship ratios based on colocation within sentences.
