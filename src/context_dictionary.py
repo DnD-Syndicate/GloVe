@@ -37,5 +37,5 @@ def corpus_cooccurence(document_dicts):
     corpus_dictionary = {}
     for dictionary in document_dicts:
         for key in dictionary.keys():
-            corpus_dictionary[key].update(dictionary[key].elements())
+            corpus_dictionary[key].update(dictionary[key])
     return corpus_dictionary
