@@ -1,7 +1,8 @@
 import string
+from src import context_dictionary
 from src.prepare_court_data import import_dataframe
 from pyspark.sql.functions import udf
-from pyspark.sql.types import ArrayType, StringType
+from pyspark.sql.types import ArrayType, StringType, IntegerType, MapType
 from nltk.tokenize import sent_tokenize, word_tokenize
 
 
@@ -33,4 +34,9 @@ token_lists = udf(lambda doc: [
     for sentence in sent_tokenize(doc.replace('\n', ' ').strip())],                 # bring the documents in divided into sentences
     ArrayType(ArrayType(StringType())))                                             # declare nested array of strings for Spark
 df_words = df_opinions_unparsed.withColumn('sents', token_lists('parsed_text'))
+
+# create a cooccurrence dictionary for each document
+udf_contexts = udf(lambda sentences: context(sentences), MapType(StringType(), MapType(StringType(), IntegerType())))
+df_word_dicts = df_words.withColumn('cooccurrence_dicts', udf_contexts('sents'))
+df_word_dicts.first()
 
