@@ -1,7 +1,8 @@
 import string
+from itertools import chain
 from src import context_dictionary
 from src.prepare_court_data import import_dataframe
-from pyspark.sql.functions import udf
+from pyspark.sql.functions import udf, explode
 from pyspark.sql.types import ArrayType, StringType, IntegerType, MapType
 from nltk.tokenize import sent_tokenize, word_tokenize
 
@@ -39,4 +40,7 @@ df_words = df_opinions_unparsed.withColumn('sents', token_lists('parsed_text'))
 udf_contexts = udf(lambda sentences: context(sentences), MapType(StringType(), MapType(StringType(), IntegerType())))
 df_word_dicts = df_words.withColumn('cooccurrence_dicts', udf_contexts('sents'))
 df_word_dicts.first()
+
+wl_udf = udf(lambda doc: chain(doc), ArrayType(StringType()))
+df_words.withColumn('words', wl_udf(df_words['sents'])).select('words').first()
 
