@@ -1,4 +1,5 @@
 #!/bin/bash
+export PYSPARK_PYTHON=python3
 export PYSPARK_DRIVER_PYTHON=ipython 
 
 ${SPARK_HOME}/bin/pyspark \
