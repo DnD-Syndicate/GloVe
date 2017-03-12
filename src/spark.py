@@ -35,6 +35,11 @@ token_lists = udf(lambda doc: [
     for sentence in sent_tokenize(doc.replace('\n', ' ').strip())],         # bring the documents in divided into sentences
     ArrayType(ArrayType(StringType())))                                     # declare nested array of strings for Spark
 df_words = df_opinions_unparsed.withColumn('sents', token_lists('parsed_text'))
+df_words.persist()
+
+# Vocabulary list of distinct terms
+vocab_list = df_words.withColumn('lists', explode('sents')).withColumn('words', explode('lists')).select('words').distinct()
+vocab_list.persist()
 
 # create a cooccurrence dictionary for each document
 udf_contexts = udf(lambda sentences: context(sentences), MapType(StringType(), MapType(StringType(), IntegerType())))
