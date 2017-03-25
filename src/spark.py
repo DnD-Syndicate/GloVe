@@ -38,7 +38,7 @@ df_words = df_opinions_unparsed.withColumn('sents', token_lists('parsed_text'))
 df_words.persist()
 
 # Vocabulary list of distinct terms
-vocab_list = df_words.withColumn('lists', explode('sents')).withColumn('words', explode('lists')).select('words').distinct()
+vocab_list = df_words.withColumn('lists', explode('sents')).withColumn('words', explode('lists')).select('words').distinct().withColumn('id', monotonically_increasing_id())
 vocab_list.persist()
 
 # create a cooccurrence dictionary for each document
