@@ -38,14 +38,10 @@ df_words = df_opinions_unparsed.withColumn('sents', token_lists('parsed_text'))
 df_words.persist()
 
 # Vocabulary list of distinct terms
-vocab_list = df_words.withColumn('lists', explode('sents')).withColumn('words', explode('lists')).select('words').distinct().withColumn('id', monotonically_increasing_id())
+vocab_list = df_words \
+        .withColumn('lists', explode('sents')) \
+        .withColumn('words', explode('lists')) \
+        .select('words') \
+        .distinct() \
+        .withColumn('id', monotonically_increasing_id())
 vocab_list.persist()
-
-# create a cooccurrence dictionary for each document
-udf_contexts = udf(lambda sentences: context(sentences), MapType(StringType(), MapType(StringType(), IntegerType())))
-df_word_dicts = df_words.withColumn('cooccurrence_dicts', udf_contexts('sents'))
-df_word_dicts.first()
-
-wl_udf = udf(lambda doc: chain(doc), ArrayType(StringType()))
-df_words.withColumn('words', wl_udf(df_words['sents'])).select('words').first()
-
