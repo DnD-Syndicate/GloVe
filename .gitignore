@@ -1,6 +1,7 @@
 # project specific files
 opinions_wash.tar.gz
 *.swp
+metastore_db/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
