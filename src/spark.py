@@ -32,7 +32,7 @@ token_lists = udf(lambda doc: [
             str.maketrans(string.punctuation, ' '*len(string.punctuation))  # a translator that changes punctuation within words
             )
         ) 
-    for sentence in sent_tokenize(doc.replace('\n', ' ').strip())],         # bring the documents in divided into sentences
+    for sentence in sent_tokenize(doc.replace('\n', ' ').strip().lower())],         # bring the documents in divided into sentences
     ArrayType(ArrayType(StringType())))                                     # declare nested array of strings for Spark
 df_words = df_opinions_unparsed.withColumn('sents', token_lists('parsed_text'))
 df_words.persist()
