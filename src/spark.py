@@ -45,3 +45,8 @@ vocab_list = df_words \
         .distinct() \
         .withColumn('id', monotonically_increasing_id())
 vocab_list.persist()
+
+# build the context dictionary for each word
+udf_contexts = udf(lambda doc: context_dictionary.context(doc), MapType(StringType(), MapType(StringType(), IntegerType())))
+df_word_dicts = df_words.withColumn('cooccurrence_dicts', udf_contexts('sents'))
+
