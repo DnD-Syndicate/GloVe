@@ -49,3 +49,6 @@ vocab_list.persist()
 udf_contexts = udf(lambda doc: context_dictionary.context(doc), MapType(StringType(), MapType(StringType(), IntegerType())))
 df_word_dicts = df_words.withColumn('cooccurrence_dicts', udf_contexts('sents'))
 df_word_dicts.persist()
+
+context_counts = df_word_dicts.select(explode('cooccurrence_dicts').alias('token', 'context')).select('token', explode('context').alias('context', 'count')).groupBy(['token', 'context']).sum('count')
+context_counts.persist()
