@@ -15,7 +15,7 @@ spark.createDataFrame(
         opinion_df
         .select('resource_id', 'parsed_text')
         .take(1000)) \
-                .write
+                .write \
                 .save('data/wash_state_1000_opinions.parquet', format='parquet', mode='overwrite')
 
 # load parquet file into Spark
@@ -32,10 +32,9 @@ token_lists = udf(lambda doc: [
             str.maketrans(string.punctuation, ' '*len(string.punctuation))  # a translator that changes punctuation within words
             )
         ) 
-    for sentence in sent_tokenize(doc.replace('\n', ' ').strip())],         # bring the documents in divided into sentences
+    for sentence in sent_tokenize(doc.replace('\n', ' ').strip().lower())],         # bring the documents in divided into sentences
     ArrayType(ArrayType(StringType())))                                     # declare nested array of strings for Spark
 df_words = df_opinions_unparsed.withColumn('sents', token_lists('parsed_text'))
-df_words.persist()
 
 # Vocabulary list of distinct terms
 vocab_list = df_words \
@@ -45,3 +44,15 @@ vocab_list = df_words \
         .distinct() \
         .withColumn('id', monotonically_increasing_id())
 vocab_list.persist()
+
+# build the context dictionary for each word
+udf_contexts = udf(lambda doc: context_dictionary.context(doc), MapType(StringType(), MapType(StringType(), IntegerType())))
+df_word_dicts = df_words.withColumn('cooccurrence_dicts', udf_contexts('sents'))
+df_word_dicts.persist()
+
+context_counts = df_word_dicts \
+        .select(explode('cooccurrence_dicts').alias('token', 'context')) \
+        .select('token', explode('context').alias('context', 'count')) \
+        .groupBy(['token', 'context']) \
+        .sum('count')
+context_counts.persist()
