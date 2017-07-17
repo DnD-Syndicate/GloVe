@@ -1,5 +1,4 @@
 import string
-from itertools import chain
 from src import context_dictionary
 from src.prepare_court_data import import_dataframe
 from pyspark.sql.functions import udf, explode, monotonically_increasing_id
